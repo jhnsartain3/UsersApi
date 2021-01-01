@@ -4,7 +4,7 @@ using Api.Controllers.Base;
 using Api.Controllers.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models;
+using SharedModels;
 
 namespace Api.Controllers
 {
@@ -43,6 +43,7 @@ namespace Api.Controllers
         }
 
         // POST: api/User
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<UserModel>> Create(UserModel model)
         {

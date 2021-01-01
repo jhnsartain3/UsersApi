@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Consumables;
-using Models;
 using Sartain_Studios_Common.Cryptography;
 using Sartain_Studios_Common.Logging;
 using Services.Interfaces;
+using SharedModels;
 
 namespace Services
 {

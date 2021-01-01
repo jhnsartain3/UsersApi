@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Consumables.Exceptions;
 using Consumables.Interfaces;
 using Contexts;
-using Models;
+using SharedModels;
 
 namespace Consumables
 {

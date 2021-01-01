@@ -2,7 +2,7 @@
 using DatabaseInteraction.Interfaces;
 using DatabaseInteraction.Models;
 using Microsoft.Extensions.Configuration;
-using Models;
+using SharedModels;
 
 namespace Contexts
 {
