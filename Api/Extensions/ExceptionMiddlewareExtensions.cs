@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Net;
-using Api.Models;
 using Consumables.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Sartain_Studios_Common.Logging;
+using Sartain_Studios_Common.SharedModels;
 using Services.Exceptions;
 
 namespace Api.Extensions
