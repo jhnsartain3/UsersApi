@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Consumables;
 using Sartain_Studios_Common.Cryptography;
 using Sartain_Studios_Common.Logging;
+using Services.Exceptions;
 using Services.Interfaces;
 using SharedModels;
 
@@ -14,6 +15,7 @@ namespace Services
         Task<bool> UsernameExistsAsync(string username);
         Task<bool> AreCredentialsValidAsync(UserModel userModel);
         Task<int> GetQuantityOfUsersAsync();
+        Task<UserModel> GetUserIdFromUsername(string username);
     }
 
     public class UserService : IUserService
@@ -95,13 +97,25 @@ namespace Services
 
         public async Task<int> GetQuantityOfUsersAsync()
         {
-            _loggerWrapper.LogInformation("Get quantity of user models", GetType().Name,
-                nameof(GetQuantityOfUsersAsync),
-                null);
+            _loggerWrapper.LogInformation("Get quantity of user models", GetType().Name, nameof(GetQuantityOfUsersAsync), null);
 
             var allUsers = await GetAllAsync();
 
             return allUsers.Count();
+        }
+
+        public async Task<UserModel> GetUserIdFromUsername(string username)
+        {
+            _loggerWrapper.LogInformation($"Get user id from username: {username}", GetType().Name, nameof(GetUserIdFromUsername), null);
+
+            var userModels = await GetAllAsync();
+
+            if (await UsernameExistsAsync(username))
+            {
+                var userModel = userModels.Where(x => x.Username != null && x.Username.Equals(username)).Select(x => x).FirstOrDefault();
+                return new UserModel { Id = userModel.Id };
+            }
+            else throw new ItemNotFoundException(username, null);
         }
     }
 }

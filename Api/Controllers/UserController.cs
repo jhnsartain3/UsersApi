@@ -94,5 +94,14 @@ namespace Api.Controllers
 
             return Ok(await UserService.AreCredentialsValidAsync(model));
         }
+
+        // GET: api/User/GetUserIdFromUsername/John
+        [HttpGet("GetUserIdFromUsername/{username}")]
+        public async Task<ActionResult<UserModel>> GetUserIdFromUsername(string username)
+        {
+            LoggerWrapper.LogInformation($"Get user id from username: {username}", GetType().Name, nameof(GetUserIdFromUsername), null);
+
+            return Ok(await UserService.GetUserIdFromUsername(username));
+        }
     }
 }

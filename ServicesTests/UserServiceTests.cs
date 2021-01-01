@@ -2,12 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Consumables;
-using Models;
 using Moq;
 using NUnit.Framework;
 using Sartain_Studios_Common.Cryptography;
 using Sartain_Studios_Common.Logging;
 using Services;
+using Services.Exceptions;
+using SharedModels;
 
 namespace ServicesTests
 {
@@ -40,6 +41,7 @@ namespace ServicesTests
             },
             new UserModel
             {
+                Id= SampleId1,
                 Username = "John",
                 Password = "Hashed JohnsPassword"
             }
@@ -138,7 +140,7 @@ namespace ServicesTests
             _hasherMock.Setup(x => x.GenerateHash("JohnsPassword")).Returns("Hashed JohnsPassword");
 
             var result = await _userService.AreCredentialsValidAsync(new UserModel
-                {Username = "John", Password = "Hashed JohnsPassword"});
+            { Username = "John", Password = "Hashed JohnsPassword" });
 
             Assert.AreEqual(false, result);
         }
@@ -151,7 +153,7 @@ namespace ServicesTests
             _hasherMock.Setup(x => x.GenerateHash("JohnsPassword")).Returns("Hashed JohnsPassword");
 
             var result = await _userService.AreCredentialsValidAsync(new UserModel
-                {Username = "John", Password = "JohnsPassword"});
+            { Username = "John", Password = "JohnsPassword" });
 
             Assert.AreEqual(true, result);
         }
@@ -164,6 +166,24 @@ namespace ServicesTests
             var result = await _userService.GetQuantityOfUsersAsync();
 
             Assert.AreEqual(2, result);
+        }
+
+        [Test]
+        public async Task GetUserIdFromUsername_ThrowsItemNotFoundExceptionIfItemDoesNotExist()
+        {
+            _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels1.AsEnumerable()));
+
+            Assert.ThrowsAsync<ItemNotFoundException>(async () => await _userService.GetUserIdFromUsername(SampleId1));
+        }
+
+        [Test]
+        public async Task GetUserIdFromUsername_ReturnsUserIdWhenGivenValidUsername()
+        {
+            _userConsumableMock.Setup(x => x.GetAllAsync()).Returns(Task.FromResult(UserModels2.AsEnumerable()));
+
+            var result = await _userService.GetUserIdFromUsername("John");
+
+            Assert.AreEqual(SampleId1, result.Id);
         }
     }
 }

@@ -36,25 +36,25 @@ namespace Api.Extensions
 
                         switch (nameOfThrownException)
                         {
-                            case nameof(UserDoesNotExistException):
-                                errorDetailsModel.StatusCode = (int) HttpStatusCode.NotAcceptable;
+                            case nameof(ItemNotFoundException):
+                                errorDetailsModel.StatusCode = (int)HttpStatusCode.NotFound;
                                 break;
                             case nameof(AlreadyInUseException):
-                                errorDetailsModel.StatusCode = (int) HttpStatusCode.UnprocessableEntity;
+                                errorDetailsModel.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
                                 break;
                             case nameof(PasswordContainsUsernameException):
-                                errorDetailsModel.StatusCode = (int) HttpStatusCode.UnprocessableEntity;
+                                errorDetailsModel.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
                                 break;
                             default:
-                                errorDetailsModel.StatusCode = (int) HttpStatusCode.InternalServerError;
+                                errorDetailsModel.StatusCode = (int)HttpStatusCode.InternalServerError;
                                 break;
                         }
 
                         errorDetailsModel.Message = contextFeature.Error.Message;
-                        
+
                         loggerWrapper.LogError(contextFeature.Error.Message, nameof(ConfigureExceptionHandler),
                             nameof(ConfigureExceptionHandler), null);
-                        
+
                         if (contextFeature.Error.InnerException != null)
                             loggerWrapper.LogError(contextFeature.Error.InnerException.Message,
                                 nameof(ConfigureExceptionHandler), nameof(ConfigureExceptionHandler), null);
@@ -64,7 +64,7 @@ namespace Api.Extensions
                         loggerWrapper.LogError("Unable to determine ContextFeature", nameof(ConfigureExceptionHandler),
                             nameof(ConfigureExceptionHandler), null);
 
-                        errorDetailsModel.StatusCode = (int) HttpStatusCode.InternalServerError;
+                        errorDetailsModel.StatusCode = (int)HttpStatusCode.InternalServerError;
                         errorDetailsModel.Message = "Unknown error occurred";
                     }
 
