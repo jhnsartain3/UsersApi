@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Consumables;
 using Sartain_Studios_Common.Cryptography;
 using Sartain_Studios_Common.Logging;
+using Sartain_Studios_Common.SharedEntities;
 using Services.Exceptions;
 using Services.Interfaces;
 using SharedModels;
 
 namespace Services
 {
-    public interface IUserService : IStandardDataAccess<UserModel>
+    public interface IUserService : ISpecificUserDataAccess<UserModel>
     {
         Task<bool> UsernameExistsAsync(string username);
-        Task<bool> AreCredentialsValidAsync(UserModel userModel);
+        Task<bool> AreCredentialsValidAsync(UserModel UserModel);
         Task<int> GetQuantityOfUsersAsync();
         Task<UserModel> GetUserIdFromUsername(string username);
     }
@@ -31,21 +33,21 @@ namespace Services
             _loggerWrapper = loggerWrapper;
         }
 
-        public async Task<IEnumerable<UserModel>> GetAllAsync()
+        public async Task<IEnumerable<UserModel>> GetAllAsync(string userId)
         {
             _loggerWrapper.LogInformation("Get All Users Models", GetType().Name, nameof(GetAllAsync), null);
 
             return (await _userConsumable.GetAllAsync()).ToList();
         }
 
-        public async Task<UserModel> GetByIdAsync(string id)
+        public async Task<UserModel> GetByIdAsync(string userId, string id)
         {
-            _loggerWrapper.LogInformation($"Get User Model By Id: {id}", GetType().Name, nameof(GetByIdAsync), null);
+            _loggerWrapper.LogInformation($"Get User Model By Id: {userId}", GetType().Name, nameof(GetByIdAsync), null);
 
-            return await _userConsumable.GetByIdAsync(id);
+            return await _userConsumable.GetByIdAsync(userId);
         }
 
-        public async Task UpdateAsync(string id, UserModel model)
+        public async Task UpdateAsync(string userId, string id, UserModel model)
         {
             _loggerWrapper.LogInformation($"Update User Model: {id}", GetType().Name, nameof(UpdateAsync), null);
 
@@ -54,17 +56,21 @@ namespace Services
             await _userConsumable.UpdateAsync(id, model);
         }
 
-        public async Task CreateAsync(UserModel model)
+        public async Task CreateAsync(string userId, UserModel model)
         {
-            _loggerWrapper.LogInformation($"Create User Model: {model.Username}", GetType().Name, nameof(CreateAsync),
-                null);
+            _loggerWrapper.LogInformation($"Create User Model: {model.Username}", GetType().Name, nameof(CreateAsync), null);
 
             model.Password = _hasher.GenerateHash(model.Password);
+            model.AccountCreatedDateTime = DateTime.UtcNow;
+
+            model.ProfilePhoto = model.ProfilePhoto != null && model.ProfilePhoto.Length > 0 ? model.ProfilePhoto : "data:image/png;base64,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";
+
+            model.Roles = new List<string>() { Role.User };
 
             await _userConsumable.CreateAsync(model);
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task DeleteAsync(string userId, string id)
         {
             _loggerWrapper.LogInformation($"Delete User Model: {id}", GetType().Name, nameof(DeleteAsync), null);
 
@@ -76,30 +82,34 @@ namespace Services
             _loggerWrapper.LogInformation($"User Model exists with name: {username}" + username, GetType().Name,
                 nameof(UsernameExistsAsync), null);
 
-            var userModels = await GetAllAsync();
+            var UserModels = await GetAllAsync(null);
 
-            return userModels.Any(x => x.Username != null && x.Username.Equals(username));
+            return UserModels.Any(x => x.Username != null && x.Username.Equals(username));
         }
 
-        public async Task<bool> AreCredentialsValidAsync(UserModel userModel)
+        public async Task<bool> AreCredentialsValidAsync(UserModel userDetailsPassed)
         {
-            _loggerWrapper.LogInformation($"Credentials are valid: {userModel.Username}", GetType().Name,
+            _loggerWrapper.LogInformation($"Credentials are valid: {userDetailsPassed.Username}", GetType().Name,
                 nameof(AreCredentialsValidAsync), null);
 
-            var userModels = await GetAllAsync();
+            var UserModels = await GetAllAsync(null);
 
-            userModel.Password = _hasher.GenerateHash(userModel.Password);
+            userDetailsPassed.Password = _hasher.GenerateHash(userDetailsPassed.Password);
 
-            return userModels.Any(x =>
-                x.Username != null && x.Username.Equals(userModel.Username) && x.Password != null &&
-                x.Password.Equals(userModel.Password));
+            var x = UserModels.Any(userDetailsFromLoop =>
+                 userDetailsFromLoop.Username != null
+                 && userDetailsFromLoop.Password != null
+                 && userDetailsFromLoop.Username.Equals(userDetailsPassed.Username)
+                 && userDetailsFromLoop.Password.Equals(userDetailsPassed.Password));
+
+            return x;
         }
 
         public async Task<int> GetQuantityOfUsersAsync()
         {
             _loggerWrapper.LogInformation("Get quantity of user models", GetType().Name, nameof(GetQuantityOfUsersAsync), null);
 
-            var allUsers = await GetAllAsync();
+            var allUsers = await GetAllAsync(null);
 
             return allUsers.Count();
         }
@@ -108,12 +118,12 @@ namespace Services
         {
             _loggerWrapper.LogInformation($"Get user id from username: {username}", GetType().Name, nameof(GetUserIdFromUsername), null);
 
-            var userModels = await GetAllAsync();
+            var UserModels = await GetAllAsync(null);
 
             if (await UsernameExistsAsync(username))
             {
-                var userModel = userModels.Where(x => x.Username != null && x.Username.Equals(username)).Select(x => x).FirstOrDefault();
-                return new UserModel { Id = userModel.Id };
+                var UserModel = UserModels.Where(x => x.Username != null && x.Username.Equals(username)).Select(x => x).FirstOrDefault();
+                return new UserModel { Id = UserModel.Id };
             }
             else throw new ItemNotFoundException(username, null);
         }

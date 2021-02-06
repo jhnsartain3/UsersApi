@@ -11,7 +11,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Sartain_Studios_Common.Cryptography;
+using Sartain_Studios_Common.Interfaces.Token;
 using Sartain_Studios_Common.Logging;
+using Sartain_Studios_Common.Token;
 using Services;
 
 namespace Api
@@ -78,6 +80,10 @@ namespace Api
 
             var logPath = Configuration.GetSection("LogWriteLocation").Value;
             services.AddSingleton<ILoggerWrapper>(new LoggerWrapper(logPath));
+
+            var jwtSecret = Configuration["AuthenticationSecret"];
+
+            services.AddSingleton<IToken>(new JwtToken(jwtSecret, -1));
         }
 
         private static void SetupConsumables(IServiceCollection services)
@@ -95,7 +101,7 @@ namespace Api
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc(ApplicationVersion,
-                    new OpenApiInfo {Title = ApplicationName, Version = ApplicationVersion});
+                    new OpenApiInfo { Title = ApplicationName, Version = ApplicationVersion });
             });
         }
 

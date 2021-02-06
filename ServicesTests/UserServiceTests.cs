@@ -65,7 +65,7 @@ namespace ServicesTests
         [Test]
         public async Task GetAllAsync_CallsGetAllAsyncOnceAsync()
         {
-            await _userService.GetAllAsync();
+            await _userService.GetAllAsync(SampleId1);
 
             _userConsumableMock.Verify(x => x.GetAllAsync(), Times.Once());
         }
@@ -73,7 +73,7 @@ namespace ServicesTests
         [Test]
         public async Task GetByIdAsync_CallsGetByIdAsyncOnce()
         {
-            await _userService.GetByIdAsync(SampleId1);
+            await _userService.GetByIdAsync(SampleId1, SampleId1);
 
             _userConsumableMock.Verify(x => x.GetByIdAsync(SampleId1), Times.Once());
         }
@@ -83,7 +83,7 @@ namespace ServicesTests
         {
             _userConsumableMock.Setup(x => x.GetByIdAsync(SampleId1)).Returns(Task.FromResult(UserModel1));
 
-            var result = await _userService.GetByIdAsync(SampleId1);
+            var result = await _userService.GetByIdAsync(SampleId1, SampleId1);
 
             Assert.AreEqual(SampleId1, result.Id);
         }
@@ -91,7 +91,7 @@ namespace ServicesTests
         [Test]
         public async Task UpdateAsync()
         {
-            await _userService.UpdateAsync(SampleId1, UserModel1);
+            await _userService.UpdateAsync(SampleId1, SampleId1, UserModel1);
 
             _userConsumableMock.Verify(x => x.UpdateAsync(SampleId1, UserModel1), Times.Once());
         }
@@ -99,7 +99,7 @@ namespace ServicesTests
         [Test]
         public async Task CreateAsync()
         {
-            await _userService.CreateAsync(UserModel1);
+            await _userService.CreateAsync(SampleId1, UserModel1);
 
             _userConsumableMock.Verify(x => x.CreateAsync(UserModel1), Times.Once());
         }
@@ -107,7 +107,7 @@ namespace ServicesTests
         [Test]
         public async Task DeleteAsync()
         {
-            await _userService.DeleteAsync(SampleId1);
+            await _userService.DeleteAsync(SampleId1, SampleId1);
 
             _userConsumableMock.Verify(x => x.DeleteAsync(SampleId1), Times.Once());
         }
